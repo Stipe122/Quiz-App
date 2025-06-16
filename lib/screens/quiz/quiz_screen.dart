@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -6,7 +8,6 @@ import '../../core/theme/app_dimensions.dart';
 import '../../models/quiz_model.dart';
 import '../../models/category_model.dart';
 import '../results/quiz_result_screen.dart';
-import '../../data/mock_data.dart';
 
 class QuizScreen extends StatefulWidget {
   final QuizModel quiz;
@@ -29,6 +30,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Timer? timer;
   int elapsedSeconds = 0;
   bool showFeedback = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -52,6 +54,8 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void selectAnswer(int index) {
+    if (showFeedback) return;
+
     setState(() {
       selectedAnswer = index;
       userAnswers[currentQuestionIndex] = index;
@@ -59,8 +63,8 @@ class _QuizScreenState extends State<QuizScreen> {
     });
 
     // Auto-proceed after showing feedback
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) {
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted && showFeedback) {
         nextQuestion();
       }
     });
@@ -70,7 +74,9 @@ class _QuizScreenState extends State<QuizScreen> {
     if (currentQuestionIndex < widget.quiz.questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
-        selectedAnswer = null;
+        selectedAnswer = userAnswers[currentQuestionIndex] != -1
+            ? userAnswers[currentQuestionIndex]
+            : null;
         showFeedback = false;
       });
     } else {
@@ -82,13 +88,21 @@ class _QuizScreenState extends State<QuizScreen> {
     if (currentQuestionIndex > 0) {
       setState(() {
         currentQuestionIndex--;
-        selectedAnswer = userAnswers[currentQuestionIndex];
+        selectedAnswer = userAnswers[currentQuestionIndex] != -1
+            ? userAnswers[currentQuestionIndex]
+            : null;
         showFeedback = false;
       });
     }
   }
 
-  void finishQuiz() {
+  Future<void> finishQuiz() async {
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
     timer?.cancel();
 
     // Calculate correct answers
@@ -110,19 +124,51 @@ class _QuizScreenState extends State<QuizScreen> {
       timeTaken: elapsedSeconds,
     );
 
-    // Save result to mock storage
-    MockData.addQuizResult(result);
+    // Save result to Firebase
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Save quiz result
+        await FirebaseFirestore.instance.collection('results').add({
+          'userId': user.uid,
+          'quizId': result.quizId,
+          'quizTitle': result.quizTitle,
+          'categoryId': result.categoryId,
+          'totalQuestions': result.totalQuestions,
+          'correctAnswers': result.correctAnswers,
+          'userAnswers': result.userAnswers,
+          'completedAt': result.completedAt,
+          'timeTaken': result.timeTaken,
+          'scorePercentage': result.scorePercentage,
+        });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => QuizResultScreen(
-          result: result,
-          quiz: widget.quiz,
-          category: widget.category,
+        // Update user stats
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+          'quizzesCompleted': FieldValue.increment(1),
+          'totalPoints': FieldValue.increment(correctAnswers * 10),
+          'categoryPoints.${widget.category.id}':
+              FieldValue.increment(correctAnswers * 10),
+        });
+      }
+    } catch (e) {
+      print('Error saving quiz result: $e');
+    }
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QuizResultScreen(
+            result: result,
+            quiz: widget.quiz,
+            category: widget.category,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   String formatTime(int seconds) {
@@ -331,7 +377,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 if (currentQuestionIndex > 0)
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: previousQuestion,
+                      onPressed: showFeedback ? null : previousQuestion,
                       child: const Text('Previous'),
                     ),
                   ),
@@ -339,17 +385,29 @@ class _QuizScreenState extends State<QuizScreen> {
                   const SizedBox(width: AppDimensions.paddingM),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: selectedAnswer != null
+                    onPressed: selectedAnswer != null && !isLoading
                         ? currentQuestionIndex ==
                                 widget.quiz.questions.length - 1
                             ? finishQuiz
-                            : nextQuestion
+                            : (showFeedback ? nextQuestion : null)
                         : null,
-                    child: Text(
-                      currentQuestionIndex == widget.quiz.questions.length - 1
-                          ? 'Finish'
-                          : 'Next',
-                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.textLight,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            currentQuestionIndex ==
+                                    widget.quiz.questions.length - 1
+                                ? 'Finish'
+                                : 'Next',
+                          ),
                   ),
                 ),
               ],

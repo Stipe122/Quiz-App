@@ -1,16 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_dimensions.dart';
 import '../../models/quiz_model.dart';
-import '../../data/mock_data.dart';
 
 class ResultsHistoryScreen extends StatelessWidget {
   const ResultsHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final results = MockData.getUserResults();
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundLight,
+        appBar: AppBar(
+          backgroundColor: AppColors.backgroundWhite,
+          elevation: 0,
+          leading: IconButton(
+            icon:
+                const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'My Results',
+            style: AppTextStyles.titleLarge,
+          ),
+        ),
+        body: const Center(
+          child: Text('Please log in to view results'),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -26,17 +49,66 @@ class ResultsHistoryScreen extends StatelessWidget {
           style: AppTextStyles.titleLarge,
         ),
       ),
-      body: results.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(AppDimensions.paddingM),
-              itemCount: results.length,
-              itemBuilder: (context, index) {
-                final result =
-                    results[results.length - 1 - index]; // Show newest first
-                return _buildResultCard(context, result);
-              },
-            ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('results')
+            .where('userId', isEqualTo: user.uid)
+            .orderBy('completedAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: AppDimensions.paddingM),
+                  Text(
+                    'Error loading results',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(AppDimensions.paddingM),
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              final doc = snapshot.data!.docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+
+              final result = QuizResult(
+                quizId: data['quizId'] ?? '',
+                quizTitle: data['quizTitle'] ?? 'Unknown Quiz',
+                categoryId: data['categoryId'] ?? '',
+                totalQuestions: data['totalQuestions'] ?? 0,
+                correctAnswers: data['correctAnswers'] ?? 0,
+                userAnswers: List<int>.from(data['userAnswers'] ?? []),
+                completedAt: (data['completedAt'] as Timestamp).toDate(),
+                timeTaken: data['timeTaken'] ?? 0,
+              );
+
+              return _buildResultCard(context, result);
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -70,8 +142,6 @@ class ResultsHistoryScreen extends StatelessWidget {
   }
 
   Widget _buildResultCard(BuildContext context, QuizResult result) {
-    final categoryName =
-        MockData.getCategoryById(result.categoryId)?.name ?? 'Unknown';
     final isPassed = result.scorePercentage >= 60;
 
     return Container(
@@ -105,11 +175,25 @@ class ResultsHistoryScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppDimensions.paddingXXS),
-                    Text(
-                      categoryName,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    // Get category name from Firebase
+                    FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('categories')
+                          .doc(result.categoryId)
+                          .get(),
+                      builder: (context, snapshot) {
+                        String categoryName = 'Unknown Category';
+                        if (snapshot.hasData && snapshot.data!.exists) {
+                          categoryName =
+                              snapshot.data!.get('name') ?? 'Unknown Category';
+                        }
+                        return Text(
+                          categoryName,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

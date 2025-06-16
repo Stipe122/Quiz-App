@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_dimensions.dart';
 import '../../models/category_model.dart';
 import '../../models/quiz_model.dart';
 import 'quiz_screen.dart';
-import '../../data/mock_data.dart';
 
 class QuizSelectionScreen extends StatelessWidget {
   final CategoryModel category;
@@ -17,9 +17,6 @@ class QuizSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get mock quizzes for this category
-    final quizzes = MockData.getQuizzesForCategory(category.id);
-
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
@@ -78,11 +75,20 @@ class QuizSelectionScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: AppDimensions.paddingXXS),
-                        Text(
-                          '${quizzes.length} quizzes available',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('quizzes')
+                              .where('categoryId', isEqualTo: category.id)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            final count = snapshot.data?.docs.length ?? 0;
+                            return Text(
+                              '$count quizzes available',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -93,12 +99,58 @@ class QuizSelectionScreen extends StatelessWidget {
 
             // Quiz List
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(AppDimensions.paddingM),
-                itemCount: quizzes.length,
-                itemBuilder: (context, index) {
-                  final quiz = quizzes[index];
-                  return _buildQuizCard(context, quiz);
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('quizzes')
+                    .where('categoryId', isEqualTo: category.id)
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: AppColors.error,
+                          ),
+                          const SizedBox(height: AppDimensions.paddingM),
+                          Text(
+                            'Error loading quizzes',
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.error,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  final quizzes = snapshot.data!.docs
+                      .map((doc) => QuizModel.fromJson({
+                            ...doc.data() as Map<String, dynamic>,
+                            'id': doc.id,
+                          }))
+                      .toList();
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(AppDimensions.paddingM),
+                    itemCount: quizzes.length,
+                    itemBuilder: (context, index) {
+                      final quiz = quizzes[index];
+                      return _buildQuizCard(context, quiz);
+                    },
+                  );
                 },
               ),
             ),
@@ -137,6 +189,22 @@ class QuizSelectionScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
+            // Quiz Icon
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: category.color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+              ),
+              child: Icon(
+                Icons.quiz,
+                color: category.color,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: AppDimensions.paddingM),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,6 +237,14 @@ class QuizSelectionScreen extends StatelessWidget {
                         quiz.difficulty,
                         color: _getDifficultyColor(quiz.difficulty),
                       ),
+                      if (quiz.timeLimit > 0) ...[
+                        const SizedBox(width: AppDimensions.paddingM),
+                        _buildInfoChip(
+                          Icons.timer,
+                          '${quiz.timeLimit ~/ 60}m',
+                          color: AppColors.warning,
+                        ),
+                      ],
                     ],
                   ),
                 ],
@@ -216,5 +292,38 @@ class QuizSelectionScreen extends StatelessWidget {
       default:
         return AppColors.textSecondary;
     }
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.paddingXL),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.quiz_outlined,
+              size: 80,
+              color: AppColors.grey300,
+            ),
+            const SizedBox(height: AppDimensions.paddingL),
+            Text(
+              'No Quizzes Available',
+              style: AppTextStyles.headlineSmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.paddingS),
+            Text(
+              'Quizzes for this category will appear here once they are added',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
