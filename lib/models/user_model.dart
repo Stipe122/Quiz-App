@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   final String uid;
   final String name;
@@ -23,6 +25,20 @@ class UserModel {
 
   // Factory constructor to create UserModel from Firebase document
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Handle createdAt field - it could be a Timestamp, int, or null
+    DateTime createdAt;
+    if (json['createdAt'] != null) {
+      if (json['createdAt'] is Timestamp) {
+        createdAt = (json['createdAt'] as Timestamp).toDate();
+      } else if (json['createdAt'] is int) {
+        createdAt = DateTime.fromMillisecondsSinceEpoch(json['createdAt']);
+      } else {
+        createdAt = DateTime.now();
+      }
+    } else {
+      createdAt = DateTime.now();
+    }
+
     return UserModel(
       uid: json['uid'] ?? '',
       name: json['name'] ?? '',
@@ -30,9 +46,7 @@ class UserModel {
       totalPoints: json['totalPoints'] ?? 0,
       quizzesCompleted: json['quizzesCompleted'] ?? 0,
       isAdmin: json['isAdmin'] ?? false,
-      createdAt: json['createdAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
-          : DateTime.now(),
+      createdAt: createdAt,
       photoUrl: json['photoUrl'],
       categoryPoints: json['categoryPoints'] != null
           ? Map<String, int>.from(json['categoryPoints'])
@@ -49,7 +63,8 @@ class UserModel {
       'totalPoints': totalPoints,
       'quizzesCompleted': quizzesCompleted,
       'isAdmin': isAdmin,
-      'createdAt': createdAt.millisecondsSinceEpoch,
+      'createdAt':
+          Timestamp.fromDate(createdAt), // Convert to Timestamp for Firestore
       'photoUrl': photoUrl,
       'categoryPoints': categoryPoints,
     };

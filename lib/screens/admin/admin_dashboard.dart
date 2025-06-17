@@ -470,7 +470,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(AppDimensions.paddingL),
+        padding: const EdgeInsets.all(
+            AppDimensions.paddingM), // Reduced from paddingL
         decoration: BoxDecoration(
           color: AppColors.backgroundWhite,
           borderRadius: BorderRadius.circular(AppDimensions.radiusL),
@@ -486,33 +487,42 @@ class _AdminDashboardState extends State<AdminDashboard> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 56,
-              height: 56,
+              width: 48, // Reduced from 56
+              height: 48, // Reduced from 56
               decoration: BoxDecoration(
                 color: color.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusM),
               ),
               child: Icon(
                 icon,
-                size: 28,
+                size: 24, // Reduced from 28
                 color: color,
               ),
             ),
-            const SizedBox(height: AppDimensions.paddingM),
-            Text(
-              title,
-              style: AppTextStyles.titleSmall.copyWith(
-                fontWeight: FontWeight.w600,
+            const SizedBox(
+                height: AppDimensions.paddingS), // Reduced from paddingM
+            Flexible(
+              child: Text(
+                title,
+                style: AppTextStyles.titleSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppDimensions.paddingXXS),
-            Text(
-              subtitle,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
+            Flexible(
+              child: Text(
+                subtitle,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),

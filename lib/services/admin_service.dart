@@ -67,7 +67,10 @@ class AdminService {
     final isUserAdmin = await isAdmin();
     if (!isUserAdmin) throw Exception('Unauthorized: Admin access required');
 
-    await _firestore.collection('quizzes').doc(quiz.id).set(quiz.toJson());
+    // Convert the quiz to JSON which will handle the timestamp conversion
+    final quizData = quiz.toJson();
+
+    await _firestore.collection('quizzes').doc(quiz.id).set(quizData);
 
     // Update quiz count in category
     await _firestore.collection('categories').doc(quiz.categoryId).update({
@@ -79,7 +82,10 @@ class AdminService {
     final isUserAdmin = await isAdmin();
     if (!isUserAdmin) throw Exception('Unauthorized: Admin access required');
 
-    await _firestore.collection('quizzes').doc(quiz.id).update(quiz.toJson());
+    // Convert the quiz to JSON which will handle the timestamp conversion
+    final quizData = quiz.toJson();
+
+    await _firestore.collection('quizzes').doc(quiz.id).update(quizData);
   }
 
   static Future<void> deleteQuiz(String quizId, String categoryId) async {

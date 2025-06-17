@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -74,63 +76,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     });
                   },
                   activeColor: AppColors.primaryPurple,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppDimensions.paddingXL),
-
-            // Quiz Settings
-            _buildSettingsSection(
-              title: 'Quiz Settings',
-              children: [
-                ListTile(
-                  title: Text(
-                    'Default Difficulty',
-                    style: AppTextStyles.bodyLarge,
-                  ),
-                  subtitle: Text(
-                    _selectedDifficulty,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: AppColors.grey400,
-                  ),
-                  onTap: () {
-                    _showDifficultyDialog();
-                  },
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppDimensions.paddingXL),
-
-            // Data & Storage
-            _buildSettingsSection(
-              title: 'Data & Storage',
-              children: [
-                ListTile(
-                  title: Text(
-                    'Clear Quiz History',
-                    style: AppTextStyles.bodyLarge,
-                  ),
-                  subtitle: Text(
-                    'Remove all completed quiz results',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  trailing: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.error,
-                  ),
-                  onTap: () {
-                    _showClearDataDialog();
-                  },
                 ),
               ],
             ),
@@ -273,87 +218,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ...children,
-        ],
-      ),
-    );
-  }
-
-  void _showDifficultyDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Default Difficulty'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<String>(
-              title: const Text('Easy'),
-              value: 'Easy',
-              groupValue: _selectedDifficulty,
-              onChanged: (value) {
-                setState(() {
-                  _selectedDifficulty = value!;
-                });
-                Navigator.pop(context);
-              },
-              activeColor: AppColors.primaryPurple,
-            ),
-            RadioListTile<String>(
-              title: const Text('Medium'),
-              value: 'Medium',
-              groupValue: _selectedDifficulty,
-              onChanged: (value) {
-                setState(() {
-                  _selectedDifficulty = value!;
-                });
-                Navigator.pop(context);
-              },
-              activeColor: AppColors.primaryPurple,
-            ),
-            RadioListTile<String>(
-              title: const Text('Hard'),
-              value: 'Hard',
-              groupValue: _selectedDifficulty,
-              onChanged: (value) {
-                setState(() {
-                  _selectedDifficulty = value!;
-                });
-                Navigator.pop(context);
-              },
-              activeColor: AppColors.primaryPurple,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showClearDataDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear Quiz History'),
-        content: const Text(
-          'Are you sure you want to clear all quiz history? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              // TODO: Clear quiz history
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Quiz history cleared!')),
-              );
-            },
-            child: const Text(
-              'Clear',
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
         ],
       ),
     );

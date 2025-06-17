@@ -193,10 +193,15 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
                 stream: FirebaseFirestore.instance
                     .collection('results')
                     .where('quizId', isEqualTo: quiz.id)
-                    .orderBy('correctAnswers', descending: true)
-                    .limit(10)
-                    .snapshots(),
+                    .snapshots(), // Remove orderBy to avoid index requirement
                 builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.all(AppDimensions.paddingM),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return Padding(
                       padding: const EdgeInsets.all(AppDimensions.paddingM),
@@ -219,6 +224,16 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
                     };
                   }).toList();
 
+                  // Sort by score percentage in the app
+                  results.sort((a, b) {
+                    final scoreA = (a['scorePercentage'] ?? 0).toDouble();
+                    final scoreB = (b['scorePercentage'] ?? 0).toDouble();
+                    return scoreB.compareTo(scoreA); // Descending order
+                  });
+
+                  // Take only top 10
+                  final topResults = results.take(10).toList();
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -226,23 +241,24 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
                         padding: const EdgeInsets.only(
                             bottom: AppDimensions.paddingM),
                         child: Text(
-                          'Top 10 Scores',
+                          'Top ${topResults.length} Scores',
                           style: AppTextStyles.labelLarge.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                      ...results.asMap().entries.map((entry) {
+                      ...topResults.asMap().entries.map((entry) {
                         final rank = entry.key + 1;
                         final result = entry.value;
-                        final user = _users[result['userId']];
+                        final userId = result['userId'] as String?;
+                        final user = userId != null ? _users[userId] : null;
 
                         return _buildLeaderboardItem(
                           rank: rank,
                           user: user,
-                          score: result['correctAnswers'],
-                          totalQuestions: result['totalQuestions'],
-                          timeTaken: result['timeTaken'],
+                          score: result['correctAnswers'] ?? 0,
+                          totalQuestions: result['totalQuestions'] ?? 0,
+                          timeTaken: result['timeTaken'] ?? 0,
                         );
                       }).toList(),
                     ],

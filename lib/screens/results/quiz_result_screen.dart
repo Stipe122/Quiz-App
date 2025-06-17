@@ -277,24 +277,6 @@ class QuizResultScreen extends StatelessWidget {
                       },
                       width: double.infinity,
                     ),
-
-                    const SizedBox(height: AppDimensions.paddingM),
-
-                    OutlinedButton(
-                      onPressed: () {
-                        // TODO: Implement review answers
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Review feature coming soon!'),
-                          ),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(
-                            double.infinity, AppDimensions.buttonHeightM),
-                      ),
-                      child: const Text('Review Answers'),
-                    ),
                   ],
                 ),
               ),

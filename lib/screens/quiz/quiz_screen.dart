@@ -372,45 +372,18 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
               ],
             ),
-            child: Row(
-              children: [
-                if (currentQuestionIndex > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: showFeedback ? null : previousQuestion,
-                      child: const Text('Previous'),
+            child: SafeArea(
+              child: SizedBox(
+                height: 50, // Fixed height to prevent layout issues
+                child: Center(
+                  child: Text(
+                    'Select an answer to continue',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                if (currentQuestionIndex > 0)
-                  const SizedBox(width: AppDimensions.paddingM),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: selectedAnswer != null && !isLoading
-                        ? currentQuestionIndex ==
-                                widget.quiz.questions.length - 1
-                            ? finishQuiz
-                            : (showFeedback ? nextQuestion : null)
-                        : null,
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.textLight,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            currentQuestionIndex ==
-                                    widget.quiz.questions.length - 1
-                                ? 'Finish'
-                                : 'Next',
-                          ),
-                  ),
                 ),
-              ],
+              ),
             ),
           ),
         ],

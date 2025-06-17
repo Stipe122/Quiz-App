@@ -78,10 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildHeader(),
                   const SizedBox(height: AppDimensions.paddingXL),
 
-                  // Quick Stats
-                  _buildQuickStats(),
-                  const SizedBox(height: AppDimensions.paddingXL),
-
                   // Categories Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -165,118 +161,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuickStats() {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingL),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatItem(
-              icon: Icons.quiz,
-              value: '${currentUser?.quizzesCompleted ?? 0}',
-              label: 'Quizzes\nCompleted',
-              color: AppColors.accentBlue,
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 50,
-            color: AppColors.grey200,
-          ),
-          Expanded(
-            child: _buildStatItem(
-              icon: Icons.star,
-              value: '${currentUser?.totalPoints ?? 0}',
-              label: 'Total\nPoints',
-              color: AppColors.accentGold,
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 50,
-            color: AppColors.grey200,
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ResultsHistoryScreen(),
-                  ),
-                );
-              },
-              child: _buildStatItem(
-                icon: Icons.history,
-                value: 'View',
-                label: 'Quiz\nHistory',
-                color: AppColors.accentGreen,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: AppDimensions.iconM,
-          ),
-        ),
-        const SizedBox(height: AppDimensions.paddingS),
-        Text(
-          value,
-          style: AppTextStyles.titleMedium.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textSecondary,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
   Widget _buildCategoriesGrid() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('categories')
           .where('isActive', isEqualTo: true)
-          .orderBy('name')
-          .snapshots(),
+          .snapshots(), // Removed orderBy for now to avoid index issues
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -288,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         if (snapshot.hasError) {
+          print('Error loading categories: ${snapshot.error}'); // Add debugging
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(AppDimensions.paddingL),
@@ -305,6 +196,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: AppColors.error,
                     ),
                   ),
+                  const SizedBox(height: AppDimensions.paddingS),
+                  Text(
+                    'Error: ${snapshot.error}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppDimensions.paddingM),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {}); // Force rebuild
+                    },
+                    child: const Text('Retry'),
+                  ),
                 ],
               ),
             ),
@@ -321,6 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   'id': doc.id,
                 }))
             .toList();
+
+        // Sort categories by name in the app if needed
+        categories.sort((a, b) => a.name.compareTo(b.name));
 
         return GridView.builder(
           shrinkWrap: true,

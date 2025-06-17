@@ -106,13 +106,11 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
               stream: _selectedCategoryId == null
                   ? FirebaseFirestore.instance
                       .collection('quizzes')
-                      .orderBy('createdAt', descending: true)
-                      .snapshots()
+                      .snapshots() // Remove orderBy to avoid index issues
                   : FirebaseFirestore.instance
                       .collection('quizzes')
                       .where('categoryId', isEqualTo: _selectedCategoryId)
-                      .orderBy('createdAt', descending: true)
-                      .snapshots(),
+                      .snapshots(), // Remove orderBy to avoid index issues
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -130,7 +128,9 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
                         ),
                         const SizedBox(height: AppDimensions.paddingM),
                         Text(
-                          'No quizzes found',
+                          _selectedCategoryId == null
+                              ? 'No quizzes found'
+                              : 'No quizzes found for this category',
                           style: AppTextStyles.bodyLarge.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -159,6 +159,9 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
                           'id': doc.id,
                         }))
                     .toList();
+
+                // Sort quizzes by createdAt in the app
+                quizzes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(AppDimensions.paddingM),
@@ -325,22 +328,30 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
   }
 
   Widget _buildInfoChip(IconData icon, String label, {Color? color}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: AppDimensions.iconXS,
-          color: color ?? AppColors.textSecondary,
-        ),
-        const SizedBox(width: AppDimensions.paddingXXS),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
+    return Flexible(
+      // Add Flexible wrapper
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: AppDimensions.iconXS,
             color: color ?? AppColors.textSecondary,
           ),
-        ),
-      ],
+          const SizedBox(width: AppDimensions.paddingXXS),
+          Flexible(
+            // Add Flexible here too
+            child: Text(
+              label,
+              style: AppTextStyles.caption.copyWith(
+                color: color ?? AppColors.textSecondary,
+              ),
+              overflow: TextOverflow.ellipsis, // Add text overflow
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

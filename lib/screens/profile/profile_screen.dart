@@ -142,7 +142,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: const Icon(Icons.edit, color: AppColors.primaryPurple),
             onPressed: () {
-              // TODO: Navigate to edit profile
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Edit profile coming soon!'),

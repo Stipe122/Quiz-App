@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class QuizModel {
   final String id;
   final String categoryId;
@@ -22,6 +24,20 @@ class QuizModel {
   int get totalQuestions => questions.length;
 
   factory QuizModel.fromJson(Map<String, dynamic> json) {
+    // Handle createdAt field - it could be a Timestamp, int, or null
+    DateTime createdAt;
+    if (json['createdAt'] != null) {
+      if (json['createdAt'] is Timestamp) {
+        createdAt = (json['createdAt'] as Timestamp).toDate();
+      } else if (json['createdAt'] is int) {
+        createdAt = DateTime.fromMillisecondsSinceEpoch(json['createdAt']);
+      } else {
+        createdAt = DateTime.now();
+      }
+    } else {
+      createdAt = DateTime.now();
+    }
+
     return QuizModel(
       id: json['id'] ?? '',
       categoryId: json['categoryId'] ?? '',
@@ -32,9 +48,7 @@ class QuizModel {
           .toList(),
       timeLimit: json['timeLimit'] ?? 0,
       difficulty: json['difficulty'] ?? 'Medium',
-      createdAt: json['createdAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
-          : DateTime.now(),
+      createdAt: createdAt,
     );
   }
 
@@ -47,7 +61,8 @@ class QuizModel {
       'questions': questions.map((q) => q.toJson()).toList(),
       'timeLimit': timeLimit,
       'difficulty': difficulty,
-      'createdAt': createdAt.millisecondsSinceEpoch,
+      'createdAt':
+          Timestamp.fromDate(createdAt), // Convert to Timestamp for Firestore
     };
   }
 }

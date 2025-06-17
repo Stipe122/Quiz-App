@@ -103,14 +103,15 @@ class QuizSelectionScreen extends StatelessWidget {
                 stream: FirebaseFirestore.instance
                     .collection('quizzes')
                     .where('categoryId', isEqualTo: category.id)
-                    .orderBy('createdAt', descending: true)
-                    .snapshots(),
+                    .snapshots(), // Removed orderBy to avoid index issues
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   if (snapshot.hasError) {
+                    print(
+                        'Error loading quizzes: ${snapshot.error}'); // Debug info
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -127,6 +128,33 @@ class QuizSelectionScreen extends StatelessWidget {
                               color: AppColors.error,
                             ),
                           ),
+                          const SizedBox(height: AppDimensions.paddingS),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppDimensions.paddingXL),
+                            child: Text(
+                              'Error details: ${snapshot.error}',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: AppDimensions.paddingL),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              // Force rebuild
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      QuizSelectionScreen(category: category),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Retry'),
+                          ),
                         ],
                       ),
                     );
@@ -142,6 +170,9 @@ class QuizSelectionScreen extends StatelessWidget {
                             'id': doc.id,
                           }))
                       .toList();
+
+                  // Sort by createdAt in the app if needed
+                  quizzes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
                   return ListView.builder(
                     padding: const EdgeInsets.all(AppDimensions.paddingM),
