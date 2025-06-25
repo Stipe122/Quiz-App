@@ -6,7 +6,7 @@ class QuizModel {
   final String title;
   final String description;
   final List<Question> questions;
-  final int timeLimit; // in seconds, 0 means no limit
+  final int timeLimit;
   final String difficulty;
   final DateTime createdAt;
 
@@ -24,7 +24,6 @@ class QuizModel {
   int get totalQuestions => questions.length;
 
   factory QuizModel.fromJson(Map<String, dynamic> json) {
-    // Handle createdAt field - it could be a Timestamp, int, or null
     DateTime createdAt;
     if (json['createdAt'] != null) {
       if (json['createdAt'] is Timestamp) {
@@ -61,8 +60,7 @@ class QuizModel {
       'questions': questions.map((q) => q.toJson()).toList(),
       'timeLimit': timeLimit,
       'difficulty': difficulty,
-      'createdAt':
-          Timestamp.fromDate(createdAt), // Convert to Timestamp for Firestore
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 }

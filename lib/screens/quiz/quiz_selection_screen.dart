@@ -44,7 +44,6 @@ class QuizSelectionScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Category Header
             Container(
               padding: const EdgeInsets.all(AppDimensions.paddingL),
               child: Row(
@@ -96,22 +95,19 @@ class QuizSelectionScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Quiz List
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('quizzes')
                     .where('categoryId', isEqualTo: category.id)
-                    .snapshots(), // Removed orderBy to avoid index issues
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   if (snapshot.hasError) {
-                    print(
-                        'Error loading quizzes: ${snapshot.error}'); // Debug info
+                    print('Error loading quizzes: ${snapshot.error}');
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -143,7 +139,6 @@ class QuizSelectionScreen extends StatelessWidget {
                           const SizedBox(height: AppDimensions.paddingL),
                           ElevatedButton.icon(
                             onPressed: () {
-                              // Force rebuild
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
@@ -171,7 +166,6 @@ class QuizSelectionScreen extends StatelessWidget {
                           }))
                       .toList();
 
-                  // Sort by createdAt in the app if needed
                   quizzes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
                   return ListView.builder(
@@ -220,7 +214,6 @@ class QuizSelectionScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Quiz Icon
             Container(
               width: 56,
               height: 56,
@@ -235,7 +228,6 @@ class QuizSelectionScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppDimensions.paddingM),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

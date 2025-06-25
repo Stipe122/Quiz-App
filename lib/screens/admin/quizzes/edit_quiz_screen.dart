@@ -40,7 +40,6 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
       _selectedDifficulty = widget.quiz!.difficulty;
       _questions = List.from(widget.quiz!.questions);
     } else {
-      // Start with one empty question
       _questions.add(Question(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         question: '',
@@ -76,7 +75,6 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
   Future<void> _saveQuiz() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Validate questions
     if (_questions.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -87,7 +85,6 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
       return;
     }
 
-    // Check if all questions are valid
     for (int i = 0; i < _questions.length; i++) {
       final q = _questions[i];
       if (q.question.trim().isEmpty) {
@@ -210,7 +207,6 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Basic Info Section
               Container(
                 color: AppColors.backgroundWhite,
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
@@ -224,8 +220,6 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                       ),
                     ),
                     const SizedBox(height: AppDimensions.paddingM),
-
-                    // Quiz Title
                     TextFormField(
                       controller: _titleController,
                       decoration: const InputDecoration(
@@ -240,10 +234,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: AppDimensions.paddingL),
-
-                    // Description
                     TextFormField(
                       controller: _descriptionController,
                       maxLines: 3,
@@ -260,10 +251,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: AppDimensions.paddingL),
-
-                    // Category Selection
                     DropdownButtonFormField<String>(
                       value: _selectedCategoryId,
                       decoration: const InputDecoration(
@@ -288,10 +276,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                         });
                       },
                     ),
-
                     const SizedBox(height: AppDimensions.paddingL),
-
-                    // Difficulty Selection
                     DropdownButtonFormField<String>(
                       value: _selectedDifficulty,
                       decoration: const InputDecoration(
@@ -315,10 +300,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingM),
-
-              // Questions Section
               Container(
                 color: AppColors.backgroundWhite,
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
@@ -342,21 +324,15 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                       ],
                     ),
                     const SizedBox(height: AppDimensions.paddingM),
-
-                    // Questions List
                     ..._questions.asMap().entries.map((entry) {
                       final index = entry.key;
                       final question = entry.value;
-
                       return _buildQuestionCard(index, question);
                     }).toList(),
                   ],
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
-
-              // Save Button (Mobile)
               Padding(
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
                 child: GradientButton(
@@ -367,7 +343,6 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                   isLoading: _isLoading,
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
             ],
           ),
@@ -404,10 +379,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
                 ),
             ],
           ),
-
           const SizedBox(height: AppDimensions.paddingM),
-
-          // Question Text
           TextFormField(
             initialValue: question.question,
             decoration: const InputDecoration(
@@ -432,19 +404,14 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
               return null;
             },
           ),
-
           const SizedBox(height: AppDimensions.paddingM),
-
-          // Options
           Text(
             'Options',
             style: AppTextStyles.labelLarge,
           ),
           const SizedBox(height: AppDimensions.paddingS),
-
           ...List.generate(4, (optionIndex) {
             final isCorrect = question.correctAnswerIndex == optionIndex;
-
             return Container(
               margin: const EdgeInsets.only(bottom: AppDimensions.paddingS),
               child: Row(
@@ -497,10 +464,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
               ),
             );
           }),
-
           const SizedBox(height: AppDimensions.paddingM),
-
-          // Explanation (Optional)
           TextFormField(
             initialValue: question.explanation,
             maxLines: 2,

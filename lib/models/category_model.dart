@@ -23,7 +23,6 @@ class CategoryModel {
     this.isActive = true,
   });
 
-  // Factory constructor to create CategoryModel from Firebase document
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
       id: json['id'] ?? '',
@@ -38,7 +37,6 @@ class CategoryModel {
     );
   }
 
-  // Convert CategoryModel to JSON for Firebase
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -53,9 +51,7 @@ class CategoryModel {
     };
   }
 
-  // Helper method to convert string to IconData
   static IconData _getIconFromString(String iconName) {
-    // Map of common category icons
     final iconMap = {
       'science': Icons.science,
       'history': Icons.history_edu,
@@ -74,9 +70,7 @@ class CategoryModel {
     return iconMap[iconName] ?? Icons.help_outline;
   }
 
-  // Helper method to convert IconData to string
   static String _getStringFromIcon(IconData icon) {
-    // Reverse map of icons to strings
     if (icon == Icons.science) return 'science';
     if (icon == Icons.history_edu) return 'history';
     if (icon == Icons.public) return 'geography';
@@ -92,7 +86,6 @@ class CategoryModel {
     return 'help_outline';
   }
 
-  // Create a copy with updated fields
   CategoryModel copyWith({
     String? id,
     String? name,
@@ -117,24 +110,21 @@ class CategoryModel {
     );
   }
 
-  // Get difficulty color
   Color getDifficultyColor() {
     switch (difficulty.toLowerCase()) {
       case 'easy':
-        return const Color(0xFF10B981); // Green
+        return const Color(0xFF10B981);
       case 'medium':
-        return const Color(0xFFF59E0B); // Orange
+        return const Color(0xFFF59E0B);
       case 'hard':
-        return const Color(0xFFEF4444); // Red
+        return const Color(0xFFEF4444);
       default:
-        return const Color(0xFF6B7280); // Gray
+        return const Color(0xFF6B7280);
     }
   }
 
-  // Check if category has quizzes
   bool get hasQuizzes => quizCount > 0;
 
-  // Get average questions per quiz
   double get averageQuestionsPerQuiz {
     if (quizCount == 0) return 0;
     return totalQuestions / quizCount;

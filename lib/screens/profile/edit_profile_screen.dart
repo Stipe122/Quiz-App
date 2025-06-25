@@ -70,7 +70,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('No user logged in');
 
-      // Update display name
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -78,9 +77,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'name': _nameController.text.trim(),
       });
 
-      // Update email if changed
       if (_emailController.text.trim() != user.email) {
-        // Re-authenticate before changing email
         if (_currentPasswordController.text.isEmpty) {
           throw Exception('Please enter your current password to change email');
         }
@@ -93,7 +90,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await user.reauthenticateWithCredential(credential);
         await user.updateEmail(_emailController.text.trim());
 
-        // Update email in Firestore
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -102,7 +98,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         });
       }
 
-      // Update password if provided
       if (_isChangingPassword && _newPasswordController.text.isNotEmpty) {
         if (_currentPasswordController.text.isEmpty) {
           throw Exception(
@@ -164,7 +159,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Info Section
               Container(
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
                 decoration: BoxDecoration(
@@ -189,7 +183,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(height: AppDimensions.paddingL),
 
-                    // Name Field
+                    // New Name
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -207,7 +201,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                     const SizedBox(height: AppDimensions.paddingL),
 
-                    // Email Field
+                    // Email
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -264,7 +258,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               const SizedBox(height: AppDimensions.paddingL),
 
-              // Password Section
+              // Password
               Container(
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
                 decoration: BoxDecoration(
@@ -308,8 +302,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     if (_isChangingPassword) ...[
                       const SizedBox(height: AppDimensions.paddingL),
-
-                      // Current Password
                       TextFormField(
                         controller: _currentPasswordController,
                         obscureText: _obscureCurrentPassword,
@@ -340,10 +332,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               }
                             : null,
                       ),
-
                       const SizedBox(height: AppDimensions.paddingL),
-
-                      // New Password
                       TextFormField(
                         controller: _newPasswordController,
                         obscureText: _obscureNewPassword,
@@ -376,10 +365,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               }
                             : null,
                       ),
-
                       const SizedBox(height: AppDimensions.paddingL),
-
-                      // Confirm Password
                       TextFormField(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,

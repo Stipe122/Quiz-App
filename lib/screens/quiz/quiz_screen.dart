@@ -62,7 +62,6 @@ class _QuizScreenState extends State<QuizScreen> {
       showFeedback = true;
     });
 
-    // Auto-proceed after showing feedback
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted && showFeedback) {
         nextQuestion();
@@ -105,7 +104,6 @@ class _QuizScreenState extends State<QuizScreen> {
 
     timer?.cancel();
 
-    // Calculate correct answers
     int correctAnswers = 0;
     for (int i = 0; i < widget.quiz.questions.length; i++) {
       if (userAnswers[i] == widget.quiz.questions[i].correctAnswerIndex) {
@@ -124,11 +122,9 @@ class _QuizScreenState extends State<QuizScreen> {
       timeTaken: elapsedSeconds,
     );
 
-    // Save result to Firebase
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Save quiz result
         await FirebaseFirestore.instance.collection('results').add({
           'userId': user.uid,
           'quizId': result.quizId,
@@ -142,7 +138,6 @@ class _QuizScreenState extends State<QuizScreen> {
           'scorePercentage': result.scorePercentage,
         });
 
-        // Update user stats
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -253,7 +248,6 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       body: Column(
         children: [
-          // Progress Bar
           Container(
             height: 8,
             color: AppColors.grey200,
@@ -267,14 +261,12 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
           ),
-
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppDimensions.paddingL),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Question Number
                   Text(
                     'Question ${currentQuestionIndex + 1} of ${widget.quiz.questions.length}',
                     style: AppTextStyles.labelLarge.copyWith(
@@ -282,8 +274,6 @@ class _QuizScreenState extends State<QuizScreen> {
                     ),
                   ),
                   const SizedBox(height: AppDimensions.paddingM),
-
-                  // Question
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(AppDimensions.paddingL),
@@ -306,10 +296,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: AppDimensions.paddingXL),
-
-                  // Options
                   ...List.generate(
                     currentQuestion.options.length,
                     (index) => _buildOptionCard(
@@ -320,7 +307,6 @@ class _QuizScreenState extends State<QuizScreen> {
                       showFeedback: showFeedback,
                     ),
                   ),
-
                   if (showFeedback && currentQuestion.explanation != null) ...[
                     const SizedBox(height: AppDimensions.paddingL),
                     Container(
@@ -358,8 +344,6 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
           ),
-
-          // Navigation Buttons
           Container(
             padding: const EdgeInsets.all(AppDimensions.paddingL),
             decoration: BoxDecoration(
@@ -374,7 +358,7 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
             child: SafeArea(
               child: SizedBox(
-                height: 50, // Fixed height to prevent layout issues
+                height: 50,
                 child: Center(
                   child: Text(
                     'Select an answer to continue',
@@ -448,7 +432,7 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
               child: Center(
                 child: Text(
-                  String.fromCharCode(65 + index), // A, B, C, D
+                  String.fromCharCode(65 + index),
                   style: AppTextStyles.labelMedium.copyWith(
                     color: borderColor != null
                         ? AppColors.textLight

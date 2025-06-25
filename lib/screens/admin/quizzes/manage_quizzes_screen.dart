@@ -71,7 +71,6 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
       ),
       body: Column(
         children: [
-          // Category Filter
           if (_categories.isNotEmpty)
             Container(
               color: AppColors.backgroundWhite,
@@ -99,18 +98,14 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
                 },
               ),
             ),
-
-          // Quiz List
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _selectedCategoryId == null
-                  ? FirebaseFirestore.instance
-                      .collection('quizzes')
-                      .snapshots() // Remove orderBy to avoid index issues
+                  ? FirebaseFirestore.instance.collection('quizzes').snapshots()
                   : FirebaseFirestore.instance
                       .collection('quizzes')
                       .where('categoryId', isEqualTo: _selectedCategoryId)
-                      .snapshots(), // Remove orderBy to avoid index issues
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -160,7 +155,6 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
                         }))
                     .toList();
 
-                // Sort quizzes by createdAt in the app
                 quizzes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
                 return ListView.builder(
@@ -269,7 +263,6 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
           ],
         ),
         children: [
-          // Questions Preview
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(AppDimensions.paddingM),
@@ -329,7 +322,6 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
 
   Widget _buildInfoChip(IconData icon, String label, {Color? color}) {
     return Flexible(
-      // Add Flexible wrapper
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -340,13 +332,12 @@ class _ManageQuizzesScreenState extends State<ManageQuizzesScreen> {
           ),
           const SizedBox(width: AppDimensions.paddingXXS),
           Flexible(
-            // Add Flexible here too
             child: Text(
               label,
               style: AppTextStyles.caption.copyWith(
                 color: color ?? AppColors.textSecondary,
               ),
-              overflow: TextOverflow.ellipsis, // Add text overflow
+              overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
           ),

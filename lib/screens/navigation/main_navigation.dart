@@ -57,7 +57,6 @@ class _MainNavigationState extends State<MainNavigation> {
 
   void _setupScreensAndNavItems() {
     if (_isAdmin) {
-      // Admin screen
       _userScreens = [
         const HomeScreen(),
         const AdminDashboard(),
@@ -84,7 +83,6 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       ];
     } else {
-      // Regular user screens
       _userScreens = [
         const HomeScreen(),
         const ProfileScreen(),

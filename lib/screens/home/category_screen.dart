@@ -72,7 +72,6 @@ class CategoryScreen extends StatelessWidget {
           'id': categoryId,
         });
 
-        // Navigate to QuizSelectionScreen using PostFrameCallback
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacement(
             context,

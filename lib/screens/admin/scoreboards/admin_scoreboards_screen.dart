@@ -35,7 +35,6 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
   }
 
   Future<void> _loadData() async {
-    // Load quizzes
     final quizzesSnapshot =
         await FirebaseFirestore.instance.collection('quizzes').get();
 
@@ -49,7 +48,6 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
       };
     });
 
-    // Load users
     final usersSnapshot =
         await FirebaseFirestore.instance.collection('users').get();
 
@@ -193,7 +191,7 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
                 stream: FirebaseFirestore.instance
                     .collection('results')
                     .where('quizId', isEqualTo: quiz.id)
-                    .snapshots(), // Remove orderBy to avoid index requirement
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Padding(
@@ -224,14 +222,12 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
                     };
                   }).toList();
 
-                  // Sort by score percentage in the app
                   results.sort((a, b) {
                     final scoreA = (a['scorePercentage'] ?? 0).toDouble();
                     final scoreB = (b['scorePercentage'] ?? 0).toDouble();
-                    return scoreB.compareTo(scoreA); // Descending order
+                    return scoreB.compareTo(scoreA);
                   });
 
-                  // Take only top 10
                   final topResults = results.take(10).toList();
 
                   return Column(
@@ -495,7 +491,7 @@ class _AdminScoreboardsScreenState extends State<AdminScoreboardsScreen>
       case 2:
         return AppColors.grey400;
       case 3:
-        return const Color(0xFFCD7F32); // Bronze
+        return const Color(0xFFCD7F32);
       default:
         return AppColors.grey300;
     }

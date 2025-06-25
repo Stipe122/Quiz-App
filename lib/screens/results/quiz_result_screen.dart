@@ -29,7 +29,6 @@ class QuizResultScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.all(AppDimensions.paddingL),
               child: Row(
@@ -56,13 +55,11 @@ class QuizResultScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
                 child: Column(
                   children: [
-                    // Score Circle
                     Container(
                       width: 200,
                       height: 200,
@@ -114,10 +111,7 @@ class QuizResultScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: AppDimensions.paddingXL),
-
-                    // Grade
                     Text(
                       'Grade: ${result.grade}',
                       style: AppTextStyles.headlineSmall.copyWith(
@@ -125,10 +119,7 @@ class QuizResultScreen extends StatelessWidget {
                         color: isPassed ? AppColors.success : AppColors.error,
                       ),
                     ),
-
                     const SizedBox(height: AppDimensions.paddingM),
-
-                    // Message
                     Text(
                       isPassed
                           ? 'Congratulations! You passed the quiz!'
@@ -138,10 +129,7 @@ class QuizResultScreen extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-
                     const SizedBox(height: AppDimensions.paddingXL),
-
-                    // Stats Cards
                     Row(
                       children: [
                         Expanded(
@@ -164,9 +152,7 @@ class QuizResultScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: AppDimensions.paddingM),
-
                     Row(
                       children: [
                         Expanded(
@@ -188,10 +174,7 @@ class QuizResultScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: AppDimensions.paddingXL),
-
-                    // Question Review
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(AppDimensions.paddingL),
@@ -260,10 +243,7 @@ class QuizResultScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: AppDimensions.paddingXL),
-
-                    // Action Buttons
                     GradientButton(
                       text: 'Try Another Quiz',
                       onPressed: () {

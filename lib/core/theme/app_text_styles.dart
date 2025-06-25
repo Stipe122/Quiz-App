@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
-  // Private constructor to prevent instantiation
   AppTextStyles._();
 
   static const String fontFamily = 'Inter';

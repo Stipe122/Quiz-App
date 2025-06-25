@@ -41,14 +41,12 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-      // Create user with email and password
       final credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      // Create user document in Firestore
       if (credential.user != null) {
         final user = UserModel(
           uid: credential.user!.uid,
@@ -63,7 +61,6 @@ class _SignupScreenState extends State<SignupScreen> {
             .set(user.toJson());
       }
 
-      // Navigation handled by AuthWrapper
       if (mounted) {
         Navigator.pop(context);
       }
@@ -112,7 +109,6 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
               Center(
                 child: Column(
                   children: [
@@ -132,15 +128,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
-
-              // Signup Form
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Name Field
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
@@ -158,10 +150,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: AppDimensions.paddingL),
-
-                    // Email Field
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -180,10 +169,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: AppDimensions.paddingL),
-
-                    // Password Field
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -214,10 +200,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: AppDimensions.paddingL),
-
-                    // Confirm Password Field
                     TextFormField(
                       controller: _confirmPasswordController,
                       obscureText: _obscureConfirmPassword,
@@ -249,10 +232,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: AppDimensions.paddingXXL),
-
-                    // Signup Button
                     GradientButton(
                       text: 'Sign Up',
                       onPressed: _signup,
@@ -260,10 +240,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       height: AppDimensions.buttonHeightL,
                       isLoading: _isLoading,
                     ),
-
                     const SizedBox(height: AppDimensions.paddingL),
-
-                    // Terms and Conditions
                     Text(
                       'By signing up, you agree to our Terms of Service and Privacy Policy',
                       style: AppTextStyles.bodySmall.copyWith(

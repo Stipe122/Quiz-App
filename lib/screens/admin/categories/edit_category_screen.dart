@@ -50,16 +50,16 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
   ];
 
   final List<Color> _availableColors = [
-    const Color(0xFF3B82F6), // Blue
-    const Color(0xFF8B5CF6), // Purple
-    const Color(0xFF10B981), // Green
-    const Color(0xFFF59E0B), // Orange
-    const Color(0xFFEC4899), // Pink
-    const Color(0xFFEF4444), // Red
-    const Color(0xFF6366F1), // Indigo
-    const Color(0xFF14B8A6), // Teal
-    const Color(0xFF84CC16), // Lime
-    const Color(0xFF06B6D4), // Cyan
+    const Color(0xFF3B82F6),
+    const Color(0xFF8B5CF6),
+    const Color(0xFF10B981),
+    const Color(0xFFF59E0B),
+    const Color(0xFFEC4899),
+    const Color(0xFFEF4444),
+    const Color(0xFF6366F1),
+    const Color(0xFF14B8A6),
+    const Color(0xFF84CC16),
+    const Color(0xFF06B6D4),
   ];
 
   @override
@@ -157,7 +157,6 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Category Name
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -175,10 +174,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: AppDimensions.paddingL),
-
-              // Description
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 3,
@@ -195,10 +191,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
-
-              // Icon Selection
               Text(
                 'Select Icon',
                 style: AppTextStyles.titleSmall.copyWith(
@@ -251,10 +244,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   },
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
-
-              // Color Selection
               Text(
                 'Select Color',
                 style: AppTextStyles.titleSmall.copyWith(
@@ -298,10 +288,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   );
                 }).toList(),
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
-
-              // Active Switch
               Container(
                 padding: const EdgeInsets.all(AppDimensions.paddingM),
                 decoration: BoxDecoration(
@@ -348,10 +335,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXXL),
-
-              // Preview
               Container(
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
                 decoration: BoxDecoration(
@@ -423,10 +407,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXXL),
-
-              // Save Button
               GradientButton(
                 text: widget.category == null
                     ? 'Create Category'
@@ -436,7 +417,6 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                 height: AppDimensions.buttonHeightL,
                 isLoading: _isLoading,
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:quizapp/screens/scoreboard/scoreboard_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_dimensions.dart';
@@ -8,7 +9,6 @@ import '../../models/category_model.dart';
 import '../../models/user_model.dart';
 import '../../widgets/common/avatar_widget.dart';
 import '../quiz/quiz_selection_screen.dart';
-import '../results/results_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,14 +17,38 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   UserModel? currentUser;
   bool isLoading = true;
+  late AnimationController _fabAnimationController;
+  late Animation<double> _fabAnimation;
 
   @override
   void initState() {
     super.initState();
+    _fabAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _fabAnimation = CurvedAnimation(
+      parent: _fabAnimationController,
+      curve: Curves.easeOut,
+    );
     _loadUserData();
+
+    // Start the FAB animation after a delay
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) {
+        _fabAnimationController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _fabAnimationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
@@ -88,25 +112,51 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          // Navigate to all categories
-                        },
-                        child: Text(
-                          'View All',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.primaryPurple,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: AppDimensions.paddingM),
 
                   // Categories Grid
                   _buildCategoriesGrid(),
+
+                  // Add padding at bottom so content isn't hidden by FAB
+                  const SizedBox(height: AppDimensions.paddingXXL),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: ScaleTransition(
+        scale: _fabAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryPurple.withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScoreboardScreen(),
+                ),
+              );
+            },
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            heroTag: 'scoreboard_fab',
+            child: const Icon(
+              Icons.leaderboard,
+              color: AppColors.textLight,
+              size: 28,
             ),
           ),
         ),
@@ -166,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: FirebaseFirestore.instance
           .collection('categories')
           .where('isActive', isEqualTo: true)
-          .snapshots(), // Removed orderBy for now to avoid index issues
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -178,7 +228,6 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         if (snapshot.hasError) {
-          print('Error loading categories: ${snapshot.error}'); // Add debugging
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(AppDimensions.paddingL),
@@ -196,18 +245,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: AppColors.error,
                     ),
                   ),
-                  const SizedBox(height: AppDimensions.paddingS),
-                  Text(
-                    'Error: ${snapshot.error}',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
                   const SizedBox(height: AppDimensions.paddingM),
                   ElevatedButton(
                     onPressed: () {
-                      setState(() {}); // Force rebuild
+                      setState(() {});
                     },
                     child: const Text('Retry'),
                   ),
@@ -228,7 +269,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 }))
             .toList();
 
-        // Sort categories by name in the app if needed
         categories.sort((a, b) => a.name.compareTo(b.name));
 
         return GridView.builder(
@@ -277,7 +317,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon Container
               Container(
                 width: 56,
                 height: 56,
@@ -291,10 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: category.color,
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingM),
-
-              // Category Name
               Text(
                 category.name,
                 style: AppTextStyles.titleSmall.copyWith(
@@ -305,10 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-
               const SizedBox(height: AppDimensions.paddingXXS),
-
-              // Quiz Count
               Text(
                 '${category.quizCount} quizzes',
                 style: AppTextStyles.bodySmall.copyWith(

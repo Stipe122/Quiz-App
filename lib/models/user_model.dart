@@ -23,9 +23,7 @@ class UserModel {
     Map<String, int>? categoryPoints,
   }) : categoryPoints = categoryPoints ?? {};
 
-  // Factory constructor to create UserModel from Firebase document
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Handle createdAt field - it could be a Timestamp, int, or null
     DateTime createdAt;
     if (json['createdAt'] != null) {
       if (json['createdAt'] is Timestamp) {
@@ -54,7 +52,6 @@ class UserModel {
     );
   }
 
-  // Convert UserModel to JSON for Firebase
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
@@ -63,14 +60,12 @@ class UserModel {
       'totalPoints': totalPoints,
       'quizzesCompleted': quizzesCompleted,
       'isAdmin': isAdmin,
-      'createdAt':
-          Timestamp.fromDate(createdAt), // Convert to Timestamp for Firestore
+      'createdAt': Timestamp.fromDate(createdAt),
       'photoUrl': photoUrl,
       'categoryPoints': categoryPoints,
     };
   }
 
-  // Create a copy with updated fields
   UserModel copyWith({
     String? uid,
     String? name,
@@ -95,7 +90,6 @@ class UserModel {
     );
   }
 
-  // Get user initials for avatar
   String get initials {
     final nameParts = name.trim().split(' ');
     if (nameParts.length >= 2) {
@@ -106,7 +100,6 @@ class UserModel {
     return 'U';
   }
 
-  // Get points for a specific category
   int getPointsForCategory(String category) {
     return categoryPoints[category] ?? 0;
   }

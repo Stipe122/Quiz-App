@@ -175,7 +175,6 @@ class ResultsHistoryScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppDimensions.paddingXXS),
-                    // Get category name from Firebase
                     FutureBuilder<DocumentSnapshot>(
                       future: FirebaseFirestore.instance
                           .collection('categories')

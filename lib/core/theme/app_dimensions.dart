@@ -1,5 +1,4 @@
 class AppDimensions {
-  // Private constructor to prevent instantiation
   AppDimensions._();
 
   // Padding & Margins
@@ -70,7 +69,7 @@ class AppDimensions {
   static const double maxCardWidth = 400.0;
   static const double maxFormWidth = 600.0;
 
-  // Animation Durations (in milliseconds)
+  // Animation Durations
   static const int animationFast = 200;
   static const int animationNormal = 300;
   static const int animationSlow = 500;

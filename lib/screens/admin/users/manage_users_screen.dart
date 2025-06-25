@@ -209,7 +209,6 @@ class ManageUsersScreen extends StatelessWidget {
         _updateAdminStatus(context, user, false);
         break;
       case 'view_results':
-        // Navigate to user's results
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('View results feature coming soon!')),
         );
@@ -266,14 +265,10 @@ class ManageUsersScreen extends StatelessWidget {
 
     if (confirm == true) {
       try {
-        // Delete user document
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
             .delete();
-
-        // Note: You cannot delete the user from Firebase Auth from client side
-        // This needs to be done via Admin SDK on server side
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User deleted from database')),

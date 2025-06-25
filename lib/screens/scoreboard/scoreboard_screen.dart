@@ -163,9 +163,6 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
               stream: FirebaseFirestore.instance
                   .collection('results')
                   .where('quizId', isEqualTo: _selectedQuizId)
-                  .orderBy('correctAnswers', descending: true)
-                  .orderBy('timeTaken')
-                  .limit(50)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -183,11 +180,22 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
                       return const Center(child: CircularProgressIndicator());
                     }
 
+                    final sortedResults = userSnapshot.data!;
+                    sortedResults.sort((a, b) {
+                      final scoreComparison = (b['correctAnswers'] as int)
+                          .compareTo(a['correctAnswers'] as int);
+                      if (scoreComparison != 0) return scoreComparison;
+                      return (a['timeTaken'] as int)
+                          .compareTo(b['timeTaken'] as int);
+                    });
+
+                    final topResults = sortedResults.take(50).toList();
+
                     return ListView.builder(
                       padding: const EdgeInsets.all(AppDimensions.paddingM),
-                      itemCount: userSnapshot.data!.length,
+                      itemCount: topResults.length,
                       itemBuilder: (context, index) {
-                        final data = userSnapshot.data![index];
+                        final data = topResults[index];
                         final isCurrentUser = data['userId'] == _currentUserId;
 
                         return _buildQuizLeaderboardItem(
@@ -237,7 +245,6 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
       padding: const EdgeInsets.all(AppDimensions.paddingM),
       child: Column(
         children: [
-          // Overall Stats Card
           StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('users')
@@ -300,10 +307,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
               );
             },
           ),
-
           const SizedBox(height: AppDimensions.paddingXL),
-
-          // Recent Results
           Text(
             'Your Recent Results',
             style: AppTextStyles.titleLarge.copyWith(
@@ -311,15 +315,16 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
             ),
           ),
           const SizedBox(height: AppDimensions.paddingM),
-
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('results')
                 .where('userId', isEqualTo: _currentUserId)
-                .orderBy('completedAt', descending: true)
-                .limit(10)
                 .snapshots(),
             builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(AppDimensions.paddingXL),
@@ -332,13 +337,38 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
                 );
               }
 
+              final results = snapshot.data!.docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return {
+                  'doc': doc,
+                  'data': data,
+                  'completedAt': data['completedAt'] as Timestamp?,
+                };
+              }).toList();
+
+              results.sort((a, b) {
+                final aTime = a['completedAt'] as Timestamp?;
+                final bTime = b['completedAt'] as Timestamp?;
+
+                if (aTime == null && bTime == null) return 0;
+                if (aTime == null) return 1;
+                if (bTime == null) return -1;
+
+                return bTime.seconds.compareTo(aTime.seconds);
+              });
+
+              final recentResults = results.take(10).toList();
+
               return Column(
-                children: snapshot.data!.docs.map((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
+                children: recentResults.map((result) {
+                  final data = result['data'] as Map<String, dynamic>;
                   final quiz = _quizzes[data['quizId']];
-                  final scorePercentage =
-                      (data['correctAnswers'] / data['totalQuestions'] * 100)
-                          .toInt();
+
+                  final correctAnswers = data['correctAnswers'] ?? 0;
+                  final totalQuestions = data['totalQuestions'] ?? 1;
+                  final scorePercentage = totalQuestions > 0
+                      ? (correctAnswers / totalQuestions * 100).toInt()
+                      : 0;
 
                   return Container(
                     margin:
@@ -390,7 +420,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
                               ),
                               const SizedBox(height: AppDimensions.paddingXXS),
                               Text(
-                                '${data['correctAnswers']}/${data['totalQuestions']} correct • ${_formatTime(data['timeTaken'])}',
+                                '$correctAnswers/$totalQuestions correct • ${_formatTime(data['timeTaken'] ?? 0)}',
                                 style: AppTextStyles.bodySmall.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -713,7 +743,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen>
       case 2:
         return AppColors.grey400;
       case 3:
-        return const Color(0xFFCD7F32); // Bronze
+        return const Color(0xFFCD7F32);
       default:
         if (rank <= 10) return AppColors.primaryPurple;
         return AppColors.grey300;

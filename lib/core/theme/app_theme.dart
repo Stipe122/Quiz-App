@@ -5,7 +5,6 @@ import 'app_text_styles.dart';
 import 'app_dimensions.dart';
 
 class AppTheme {
-  // Private constructor to prevent instantiation
   AppTheme._();
 
   static ThemeData get lightTheme {
@@ -153,9 +152,7 @@ class AppTheme {
     );
   }
 
-  // You can add a dark theme here if needed
   static ThemeData get darkTheme {
-    // Implementation for dark theme
-    return lightTheme; // Placeholder - implement dark theme when needed
+    return lightTheme;
   }
 }

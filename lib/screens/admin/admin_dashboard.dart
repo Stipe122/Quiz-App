@@ -41,7 +41,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         });
       }
     } catch (e) {
-      print('Error loading dashboard stats: $e');
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -81,7 +80,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppDimensions.paddingXL),
@@ -213,7 +211,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
               const SizedBox(height: AppDimensions.paddingXL),
 
-              // Admin Options Grid
+              // Management Tools
               Text(
                 'Management Tools',
                 style: AppTextStyles.titleLarge.copyWith(
@@ -234,7 +232,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     context: context,
                     icon: Icons.people,
                     title: 'Manage Users',
-                    subtitle: 'View and manage all users',
+                    subtitle: 'Manage all users',
                     color: AppColors.accentBlue,
                     onTap: () {
                       Navigator.push(
@@ -249,7 +247,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     context: context,
                     icon: Icons.category,
                     title: 'Categories',
-                    subtitle: 'Create and edit categories',
+                    subtitle: 'Edit Categories',
                     color: AppColors.accentGreen,
                     onTap: () {
                       Navigator.push(
@@ -470,8 +468,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(
-            AppDimensions.paddingM), // Reduced from paddingL
+        padding: const EdgeInsets.all(AppDimensions.paddingM),
         decoration: BoxDecoration(
           color: AppColors.backgroundWhite,
           borderRadius: BorderRadius.circular(AppDimensions.radiusL),
@@ -487,20 +484,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 48, // Reduced from 56
-              height: 48, // Reduced from 56
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
                 color: color.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusM),
               ),
               child: Icon(
                 icon,
-                size: 24, // Reduced from 28
+                size: 24,
                 color: color,
               ),
             ),
-            const SizedBox(
-                height: AppDimensions.paddingS), // Reduced from paddingM
+            const SizedBox(height: AppDimensions.paddingS),
             Flexible(
               child: Text(
                 title,

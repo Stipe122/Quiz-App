@@ -161,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: AppDimensions.paddingXXL),
 
-            // Version Info
+            // Version Infp
             Center(
               child: Column(
                 children: [

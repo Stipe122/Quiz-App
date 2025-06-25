@@ -53,7 +53,6 @@ class _SimplifiedCategoryCardState extends State<SimplifiedCategoryCard> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon Container
               Container(
                 width: 56,
                 height: 56,
@@ -67,10 +66,7 @@ class _SimplifiedCategoryCardState extends State<SimplifiedCategoryCard> {
                   color: widget.category.color,
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingM),
-
-              // Category Name
               Text(
                 widget.category.name,
                 style: AppTextStyles.titleSmall.copyWith(
@@ -81,10 +77,7 @@ class _SimplifiedCategoryCardState extends State<SimplifiedCategoryCard> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-
               const SizedBox(height: AppDimensions.paddingXXS),
-
-              // Quiz Count
               Text(
                 '${widget.category.quizCount} quizzes',
                 style: AppTextStyles.bodySmall.copyWith(

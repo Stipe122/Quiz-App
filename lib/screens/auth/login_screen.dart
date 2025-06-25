@@ -39,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      // Navigation handled by AuthWrapper
     } on FirebaseAuthException catch (e) {
       String message = 'An error occurred';
       if (e.code == 'user-not-found') {
@@ -79,7 +78,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: AppDimensions.paddingXXL),
 
-              // Logo and Title
               Center(
                 child: Column(
                   children: [
@@ -126,7 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Email Field
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -148,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: AppDimensions.paddingL),
 
-                    // Password Field
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -182,12 +178,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: AppDimensions.paddingS),
 
-                    // Forgot Password
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          // TODO: Implement forgot password
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content:
@@ -217,7 +211,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: AppDimensions.paddingXL),
 
-                    // Sign Up Link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

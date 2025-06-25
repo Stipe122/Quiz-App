@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:quizapp/screens/auth/auth_wrapper.dart';
+import 'package:quizapp/screens/profile/edit_profile_screen.dart';
+import 'package:quizapp/screens/scoreboard/scoreboard_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_dimensions.dart';
@@ -32,7 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Load user profile
         final userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -44,7 +46,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           });
         }
 
-        // Load user quiz results for statistics
         final resultsSnapshot = await FirebaseFirestore.instance
             .collection('results')
             .where('userId', isEqualTo: user.uid)
@@ -80,15 +81,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _logout() async {
+  Future<void> _handleLogout() async {
     try {
       await FirebaseAuth.instance.signOut();
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+          '/auth',
+          (Route<dynamic> route) => false,
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error logging out: $e'),
-            backgroundColor: AppColors.error,
+            content: Text('Failed to logout: ${e.toString()}'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -142,9 +150,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: const Icon(Icons.edit, color: AppColors.primaryPurple),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Edit profile coming soon!'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EditProfileScreen(),
                 ),
               );
             },
@@ -158,7 +167,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.all(AppDimensions.paddingL),
           child: Column(
             children: [
-              // Profile Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppDimensions.paddingXL),
@@ -242,10 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
-
-              // Stats Overview
               Container(
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
                 decoration: BoxDecoration(
@@ -289,10 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: AppDimensions.paddingXL),
-
-              // Menu Options
               _buildMenuSection(
                 title: 'Quiz Activity',
                 items: [
@@ -321,39 +323,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: AppDimensions.paddingM),
-
               _buildMenuSection(
-                title: 'Account',
+                title: 'Settings',
                 items: [
                   _MenuItemData(
-                    icon: Icons.person_outline,
+                    icon: Icons.edit,
                     title: 'Edit Profile',
-                    subtitle: 'Update your information',
+                    subtitle: 'Update your personal information',
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Edit profile coming soon!')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EditProfileScreen(),
+                        ),
                       );
                     },
                   ),
                   _MenuItemData(
-                    icon: Icons.lock_outline,
-                    title: 'Change Password',
-                    subtitle: 'Update your password',
+                    icon: Icons.leaderboard,
+                    title: 'Scoreboards',
+                    subtitle: 'View quiz rankings and your position',
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Change password coming soon!')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ScoreboardScreen(),
+                        ),
                       );
                     },
                   ),
                 ],
               ),
-
               const SizedBox(height: AppDimensions.paddingM),
-
               _buildMenuSection(
                 title: 'About',
                 items: [
@@ -374,89 +376,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('OK'),
+                              child: const Text('Close'),
                             ),
                           ],
                         ),
                       );
                     },
                   ),
-                  _MenuItemData(
-                    icon: Icons.share_outlined,
-                    title: 'Share App',
-                    subtitle: 'Tell your friends',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Share feature coming soon!')),
-                      );
-                    },
-                  ),
                 ],
               ),
-
-              const SizedBox(height: AppDimensions.paddingM),
-
-              // Logout Button
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadow.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ListTile(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Logout'),
-                        content: const Text('Are you sure you want to logout?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _logout();
-                            },
-                            child: const Text(
-                              'Logout',
-                              style: TextStyle(color: AppColors.error),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  leading: const Icon(
-                    Icons.logout,
-                    color: AppColors.error,
+              const SizedBox(height: AppDimensions.paddingXL),
+              ElevatedButton.icon(
+                onPressed: _handleLogout,
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentRed,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppDimensions.paddingM,
+                    horizontal: AppDimensions.paddingXL,
                   ),
-                  title: Text(
-                    'Logout',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.error,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: AppColors.error,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
                   ),
                 ),
               ),
-
-              const SizedBox(height: AppDimensions.paddingXL),
             ],
           ),
         ),
@@ -469,7 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Text(
           value,
-          style: AppTextStyles.headlineMedium.copyWith(
+          style: AppTextStyles.titleLarge.copyWith(
             color: AppColors.textLight,
             fontWeight: FontWeight.bold,
           ),
@@ -477,23 +421,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: AppDimensions.paddingXS),
         Text(
           label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textLight.withOpacity(0.8),
-          ),
           textAlign: TextAlign.center,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.textLight,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildMenuSection({
-    required String title,
-    required List<_MenuItemData> items,
-  }) {
+  Widget _buildMenuSection(
+      {required String title, required List<_MenuItemData> items}) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimensions.paddingL),
       decoration: BoxDecoration(
         color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow.withOpacity(0.05),
@@ -505,82 +449,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(AppDimensions.paddingM),
-            child: Text(
-              title,
-              style: AppTextStyles.labelLarge.copyWith(
-                color: AppColors.textSecondary,
-              ),
+          Text(
+            title,
+            style: AppTextStyles.headlineSmall.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
-          ...items.map((item) => ListTile(
-                onTap: item.onTap,
-                leading: Icon(
-                  item.icon,
-                  color: AppColors.primaryPurple,
-                ),
-                title: Text(
-                  item.title,
-                  style: AppTextStyles.bodyLarge,
-                ),
-                subtitle: item.subtitle != null
-                    ? Text(
-                        item.subtitle!,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      )
-                    : null,
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppColors.grey400,
-                ),
-              )),
+          const SizedBox(height: AppDimensions.paddingM),
+          ...items.map(
+            (item) => ListTile(
+              leading: Icon(item.icon, color: AppColors.primaryPurple),
+              title: Text(item.title),
+              subtitle: Text(item.subtitle),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: item.onTap,
+            ),
+          ),
         ],
       ),
     );
   }
 
   String _formatDate(DateTime date) {
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-    return '${months[date.month - 1]} ${date.year}';
+    return '${date.month}/${date.day}/${date.year}';
   }
 
   String _formatTotalTime(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
+    final Duration duration = Duration(seconds: seconds);
+    final int hours = duration.inHours;
+    final int minutes = duration.inMinutes % 60;
+    final int secs = duration.inSeconds % 60;
     if (hours > 0) {
       return '${hours}h ${minutes}m';
+    } else if (minutes > 0) {
+      return '${minutes}m ${secs}s';
+    } else {
+      return '${secs}s';
     }
-    return '${minutes}m';
   }
 }
 
 class _MenuItemData {
   final IconData icon;
   final String title;
-  final String? subtitle;
+  final String subtitle;
   final VoidCallback onTap;
 
   _MenuItemData({
     required this.icon,
     required this.title,
-    this.subtitle,
+    required this.subtitle,
     required this.onTap,
   });
 }
